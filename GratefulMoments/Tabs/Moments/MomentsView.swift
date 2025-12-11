@@ -26,6 +26,7 @@ struct MomentsView: View {
                 pathItems
                     .frame(maxWidth: .infinity)
             }
+            .contentMargins(.vertical, 50, for: .scrollContent)
             .overlay {
                 if moments.isEmpty {
                     ContentUnavailableView {

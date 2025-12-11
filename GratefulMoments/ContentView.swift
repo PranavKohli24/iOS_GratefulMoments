@@ -8,23 +8,19 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var isPresented: Bool = false
-    
     var body: some View {
-        VStack {
-            Button("Create a Grateful Moment"){
-                isPresented = true
-                
-            }
-            .buttonStyle(.bordered)
-            .sheet(isPresented: $isPresented) {
-                MomentEntryView()
-            }
+        TabView {
+            MomentsView()
+                .tabItem {
+                    Label("Moments", systemImage: "heart.fill")
+                }
+            
+            
         }
-        .padding()
     }
 }
 
 #Preview {
     ContentView()
+        .sampleDataContainer()
 }
