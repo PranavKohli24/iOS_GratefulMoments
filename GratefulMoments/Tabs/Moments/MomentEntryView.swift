@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct MomentEntryView: View {
     
     @State private var title = ""
     @State private var note = ""
+    @State private var newImage: PhotosPickerItem?
 
     
     var body: some View {
@@ -23,6 +25,18 @@ struct MomentEntryView: View {
             .navigationTitle("Grateful For")
         }
     }
+    
+    private var photoPicker: some View {
+        PhotosPicker(selection: $newImage) {
+            Image(systemName: "photo.badge.plus.fill")
+                .font(.largeTitle)
+                .frame(height: 250)
+                .frame(maxWidth: .infinity)
+                .background(Color(white: 0.4, opacity: 0.32))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+    }
+    
     
     var contentStack: some View {
             VStack(alignment: .leading) {
@@ -38,6 +52,8 @@ struct MomentEntryView: View {
                 TextField("Log your small wins", text: $note, axis: .vertical)
                                .multilineTextAlignment(.leading)
                                .lineLimit(5...Int.max)
+                
+                photoPicker
             }
             .padding()
         }
