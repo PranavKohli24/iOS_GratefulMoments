@@ -2,18 +2,24 @@
 //  ContentView.swift
 //  GratefulMoments
 //
-//  Created by Vaibhav Monga on 11/12/25.
+//  Created by Pranav Kohli on 11/12/25.
 //
 
 import SwiftUI
 
 struct ContentView: View {
+    @State private var isPresented: Bool = false
+    
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, Pranav Kohli!")
+            Button("Create a Grateful Moment"){
+                isPresented = true
+                
+            }
+            .buttonStyle(.bordered)
+            .sheet(isPresented: $isPresented) {
+                MomentEntryView()
+            }
         }
         .padding()
     }

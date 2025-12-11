@@ -2,17 +2,24 @@
 //  MomentEntryView.swift
 //  GratefulMoments
 //
-//  Created by Vaibhav Monga on 11/12/25.
+//  Created by Pranav Kohli on 11/12/25.
 //
 
 import SwiftUI
 import PhotosUI
+import SwiftData
 
 struct MomentEntryView: View {
     
     @State private var title = ""
     @State private var note = ""
+    @State private var imageData: Data?
     @State private var newImage: PhotosPickerItem?
+    @State private var isShowingCancelConfirmation = false
+
+    
+    @Environment(\.dismiss) private var dismiss
+    @Environment(DataContainer.self) private var dataContainer
 
     
     var body: some View {
@@ -23,18 +30,76 @@ struct MomentEntryView: View {
             .scrollDismissesKeyboard(.interactively)
             
             .navigationTitle("Grateful For")
+            .toolbar {
+                
+                
+                
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", systemImage: "xmark") {
+                        if title.isEmpty, note.isEmpty, imageData == nil {
+                            dismiss()
+                        } else {
+                            isShowingCancelConfirmation = true
+                        }
+                    }
+                    
+                    
+                    .confirmationDialog("Discard Moment", isPresented: $isShowingCancelConfirmation) {
+                                Button("Discard Moment", role: .destructive) {
+
+                                    dismiss()
+                                }
+                            }
+                }
+                
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add", systemImage: "checkmark") {
+
+                        let newMoment = Moment(
+                            title: title,
+                            note: note,
+                            imageData: imageData,
+                            timestamp: .now
+                        )
+                                    
+                            dataContainer.context.insert(newMoment)
+                            do {
+                                try dataContainer.context.save()
+                                dismiss()
+                            } catch {
+                                // Don't dismiss
+                            }
+                        }
+                                .disabled(title.isEmpty)
+                    }
+                }
         }
     }
     
     private var photoPicker: some View {
         PhotosPicker(selection: $newImage) {
-            Image(systemName: "photo.badge.plus.fill")
-                .font(.largeTitle)
-                .frame(height: 250)
-                .frame(maxWidth: .infinity)
-                .background(Color(white: 0.4, opacity: 0.32))
+            Group{
+                if let imageData, let uiImage = UIImage(data: imageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                } else {
+                    Image(systemName: "photo.badge.plus.fill")
+                        .font(.largeTitle)
+                        .frame(height: 250)
+                        .frame(maxWidth: .infinity)
+                        .background(Color(white: 0.4, opacity: 0.32))
+                }
+            }
                 .clipShape(RoundedRectangle(cornerRadius: 16))
         }
+            
+        .onChange(of: newImage) {
+            guard let newImage else { return }
+            Task {
+                            imageData = try await newImage.loadTransferable(type: Data.self)
+                        }
+                }
     }
     
     
@@ -61,4 +126,5 @@ struct MomentEntryView: View {
 
 #Preview {
     MomentEntryView()
+        .sampleDataContainer()
 }
